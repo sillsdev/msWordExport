@@ -133,7 +133,13 @@ namespace msWordExport
                     "text-indent",
                     "margin-left",
                     "padding-bottom",
-                    "padding-top"
+                    "padding-top",
+                    "border-style",
+                    "border-top",
+                    "border-bottom",
+                    "border-left",
+                    "border-right",
+                    "border-width"
                 };
             foreach (string line in cssData.Split(new[] {'\n'}))
             {

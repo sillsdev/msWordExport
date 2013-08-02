@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_B277B9FF213D4B308018A1662C5EA017"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_CAEF2AAFA4274B359A7C341A3093EC22"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -136,6 +142,26 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B277B9FF213D4B308018A1662C5EA017"
+            {
+            "SourcePath" = "8:..\\..\\msWordExport_3.zip"
+            "TargetName" = "8:msWordExport_3.zip"
+            "Tag" = "8:"
+            "Folder" = "8:_2A164E01F9294962B84E86D28D41D204"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CAEF2AAFA4274B359A7C341A3093EC22"
             {
             "SourcePath" = "8:..\\msWordExport\\ImportFlex2Word.bat"
@@ -223,15 +249,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:msWordExport"
-        "ProductCode" = "8:{9FE6001C-9103-49BD-B3EB-E00B396E3BD6}"
-        "PackageCode" = "8:{B1A8DA0C-5ED4-4A06-ADEF-460319717F72}"
+        "ProductCode" = "8:{3EA313D2-CDB4-46E2-A925-2C50727E4E48}"
+        "PackageCode" = "8:{2620807A-75EF-4E01-B97C-F1A0CD95A37B}"
         "UpgradeCode" = "8:{9BF7FE6A-A95D-41BE-BE53-41CD38BDA358}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.3"
+        "ProductVersion" = "8:1.0.4"
         "Manufacturer" = "8:SIL"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://pathway.sil.org"
