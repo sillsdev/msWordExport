@@ -33,7 +33,6 @@ namespace msWordExport
         {
             var xsltSettings = new XsltSettings() { EnableDocumentFunction = true };
             bool showHelp = false;
-            var myArgs = new List<string>();
             var output = "main.doc";
             var title = "My Title";
             // see: http://stackoverflow.com/questions/491595/best-way-to-parse-command-line-arguments-in-c
@@ -43,9 +42,7 @@ namespace msWordExport
                    v => output = v },
                 { "t|title=", "the {TITLE}.\n" +
                         "Defaults to My Title.",
-                   v => output = v },
-                { "d|define=", "define argument:value for transformation.",
-                   v => myArgs.Add (v) },
+                   v => title = v },
                 { "v", "increase debug message verbosity",
                    v => { if (v != null) ++_verbosity; } },
                 { "h|help",  "show this message and exit", 
@@ -80,9 +77,6 @@ namespace msWordExport
             {
                 output = Path.Combine(Path.GetDirectoryName(extra[0]), output);
             }
-
-            var xsltArgs = new XsltArgumentList();
-            CreateArgumentList(myArgs, xsltArgs);
 
             var cssData = GetData(extra[0]);
             var xDoc = new XmlDocument {XmlResolver = null};
