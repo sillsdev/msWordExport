@@ -10,6 +10,7 @@
 //
 // File: program.cs
 // Responsibility: Greg Trihus
+// License: LGPL2
 // ---------------------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
@@ -112,7 +113,6 @@ namespace msWordExport
             var settings = new XmlWriterSettings
                 {
                     OmitXmlDeclaration = true,
-                    Indent = true,
                     Encoding = new UTF8Encoding(true)
                 };
             var xWriter = XmlWriter.Create(output, settings);
@@ -193,53 +193,74 @@ namespace msWordExport
 
         private static void ApplyRules(XmlDocument xDoc, string cssData)
         {
+            var beforeRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+):before\\s{\\scontent:\\s\"([^\"]*)");
+            var betweenRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+)>\\.xitem\\s\\+\\s\\.xitem:before\\s{\\scontent:\\s\"([^\"]*)");
+            var afterRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+):after\\s{\\scontent:\\s\"([^\"]*)");
             foreach (XmlNode node in xDoc.SelectNodes("//*[@class]"))
             {
-                var className = node.Attributes["class"].InnerText;
-                ApplyBeforeRule(cssData, className, node);
-                ApplyBetweenRules(cssData, className, node);
-                ApplyAfterRules(cssData, className, node);
+                var classNames = node.Attributes["class"].InnerText;
+                var classList = classNames.Split(new[] {' '});
+                var nonContentClass = string.Empty;
+                foreach (var className in classList)
+                {
+                    var found = ApplyBeforeRule(beforeRules, className, node);
+                    found |= ApplyBetweenRules(betweenRules, className, node);
+                    found |= ApplyAfterRules(afterRules, className, node);
+                    if (!found)
+                    {
+                        if (nonContentClass != string.Empty)
+                        {
+                            throw new ArgumentException(string.Format("Two non-content classes {0} and {1}", nonContentClass, className));
+                        }
+                        nonContentClass = className;
+                    }
+                }
+                if (classList.Length > 1)
+                {
+                    node.Attributes["class"].InnerText = nonContentClass;
+                }
+
             }
         }
 
-        private static void ApplyAfterRules(string cssData, string className, XmlNode node)
+        private static bool ApplyBeforeRule(IDictionary<string, string> beforeRules, string className, XmlNode node)
         {
-            var afterRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+):after\\s{\\scontent:\\s\"([^\"]*)");
-            if (afterRules.ContainsKey(className))
+            var found = beforeRules.ContainsKey(className);
+            if (found)
             {
-                node.InnerText = node.InnerText + afterRules[className];
+                node.InnerText = beforeRules[className] + node.InnerText;
             }
+            return found;
         }
 
-        private static void ApplyBetweenRules(string cssData, string className, XmlNode node)
+        private static bool ApplyBetweenRules(IDictionary<string, string> betweenRules, string className, XmlNode node)
         {
-            var betweenRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+)>\\.xitem\\s\\+\\s\\.xitem:before\\s{\\scontent:\\s\"([^\"]*)");
-            if (betweenRules.ContainsKey(className))
+            var found = betweenRules.ContainsKey(className);
+            if (found)
             {
+
                 var first = true;
-                foreach (XmlElement child in node.SelectNodes("*"))
+                foreach (XmlElement child in node.SelectNodes("./*[@class = 'xitem']"))
                 {
                     if (first)
                     {
-                        if (child.HasAttribute("class") && child.Attributes["class"].Value != "xitem")
-                        {
-                            continue;
-                        }
                         first = false;
                         continue;
                     }
                     child.InnerText = betweenRules[className] + child.InnerText;
                 }
             }
+            return found;
         }
 
-        private static void ApplyBeforeRule(string cssData, string className, XmlNode node)
+        private static bool ApplyAfterRules(IDictionary<string, string> afterRules, string className, XmlNode node)
         {
-            var beforeRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+):before\\s{\\scontent:\\s\"([^\"]*)");
-            if (beforeRules.ContainsKey(className))
+            var found = afterRules.ContainsKey(className);
+            if (found)
             {
-                node.InnerText = beforeRules[className] + node.InnerText;
+                node.InnerText = node.InnerText + afterRules[className];
             }
+            return found;
         }
 
         private static string GetData(string fullName)
