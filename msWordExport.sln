@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "msWordExport", "msWordExport\msWordExport.csproj", "{4677E68B-E225-4A32-947C-029D4D7A9098}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{F6E2DA5B-1FE2-4CAF-B29B-F8215A8CA617}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{4677E68B-E225-4A32-947C-029D4D7A9098}.Debug|x86.Build.0 = Debug|x86
 		{4677E68B-E225-4A32-947C-029D4D7A9098}.Release|x86.ActiveCfg = Release|x86
 		{4677E68B-E225-4A32-947C-029D4D7A9098}.Release|x86.Build.0 = Release|x86
+		{F6E2DA5B-1FE2-4CAF-B29B-F8215A8CA617}.Debug|x86.ActiveCfg = Debug
+		{F6E2DA5B-1FE2-4CAF-B29B-F8215A8CA617}.Debug|x86.Build.0 = Debug
+		{F6E2DA5B-1FE2-4CAF-B29B-F8215A8CA617}.Release|x86.ActiveCfg = Release
+		{F6E2DA5B-1FE2-4CAF-B29B-F8215A8CA617}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
