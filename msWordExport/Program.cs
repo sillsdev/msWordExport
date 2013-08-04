@@ -31,7 +31,6 @@ namespace msWordExport
 
         static void Main(string[] args)
         {
-            var xsltSettings = new XsltSettings() { EnableDocumentFunction = true };
             bool showHelp = false;
             var output = "main.doc";
             var title = "My Title";
@@ -83,11 +82,35 @@ namespace msWordExport
             GetXhtml(extra, xDoc);
             ApplyRules(xDoc, cssData);
             var nsmgr = GetNamespaceManager(xDoc);
+            ChangeDiv2P(xDoc, nsmgr);
             InsertStyles(cssData, xDoc, nsmgr);
             InsertTitle(xDoc, nsmgr, title);
             UpdateImgSrc(xDoc, nsmgr);
             WriteXhtml(output, xDoc);
             Process.Start(output);
+        }
+
+        private static void ChangeDiv2P(XmlDocument xDoc, XmlNamespaceManager nsmgr)
+        {
+            var divNode = xDoc.SelectNodes("//xhtml:div[xhtml:span]", nsmgr);
+            for (int divIdx = 0; divIdx < divNode.Count; divIdx += 1)
+            {
+                var divElement = divNode[divIdx];
+                var pNode = xDoc.CreateElement("p", "http://www.w3.org/1999/xhtml");
+                var attrNode = new XmlAttribute[divElement.Attributes.Count];
+                divElement.Attributes.CopyTo(attrNode,0);
+                for (int attrIdx = 0; attrIdx < attrNode.Length; attrIdx += 1)
+                {
+                    pNode.Attributes.Append(attrNode[attrIdx]);
+                }
+                foreach (XmlElement element in divElement.ChildNodes)
+                {
+                    pNode.AppendChild(element.CloneNode(true));
+                }
+                var parent = divElement.ParentNode;
+                parent.InsertAfter(pNode, divElement.PreviousSibling);
+                parent.RemoveChild(divElement);
+            }
         }
 
         private static void UpdateImgSrc(XmlDocument xDoc, XmlNamespaceManager nsmgr)
@@ -127,7 +150,7 @@ namespace msWordExport
             var propPattern = new Regex("\\s+([-a-zA-Z]+)\\:");
             var isSpan = false;
             var firstDecl = false;
-            var propertyList = new List<string>(5)
+            var propertyList = new List<string>()
                 {
                     "padding-left",
                     "text-indent",
@@ -139,7 +162,8 @@ namespace msWordExport
                     "border-bottom",
                     "border-left",
                     "border-right",
-                    "border-width"
+                    "border-width",
+                    "border-color"
                 };
             foreach (string line in cssData.Split(new[] {'\n'}))
             {
