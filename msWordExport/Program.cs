@@ -82,7 +82,8 @@ namespace msWordExport
             GetXhtml(extra, xDoc);
             ApplyRules(xDoc, cssData);
             var nsmgr = GetNamespaceManager(xDoc);
-            ChangeDiv2P(xDoc, nsmgr);
+            ChangeDiv2P("//xhtml:div[xhtml:span]", xDoc, nsmgr);
+            ChangeDiv2P("//xhtml:div[@class='letter']", xDoc, nsmgr);
             InsertStyles(cssData, xDoc, nsmgr);
             InsertTitle(xDoc, nsmgr, title);
             UpdateImgSrc(xDoc, nsmgr);
@@ -90,9 +91,9 @@ namespace msWordExport
             Process.Start(output);
         }
 
-        private static void ChangeDiv2P(XmlDocument xDoc, XmlNamespaceManager nsmgr)
+        private static void ChangeDiv2P(string xpath, XmlDocument xDoc, XmlNamespaceManager nsmgr)
         {
-            var divNode = xDoc.SelectNodes("//xhtml:div[xhtml:span]", nsmgr);
+            var divNode = xDoc.SelectNodes(xpath, nsmgr);
             for (int divIdx = 0; divIdx < divNode.Count; divIdx += 1)
             {
                 var divElement = divNode[divIdx];
@@ -103,7 +104,7 @@ namespace msWordExport
                 {
                     pNode.Attributes.Append(attrNode[attrIdx]);
                 }
-                foreach (XmlElement element in divElement.ChildNodes)
+                foreach (XmlNode element in divElement.ChildNodes)
                 {
                     pNode.AppendChild(element.CloneNode(true));
                 }
@@ -209,12 +210,6 @@ namespace msWordExport
             xfs.Close();
         }
 
-        private static void UpdateStyleLink(XmlDocument xDoc, XmlNamespaceManager nsmgr, string cssName)
-        {
-            var styleLinkNode = xDoc.SelectSingleNode("//xhtml:link[@rel='stylesheet']", nsmgr);
-            styleLinkNode.Attributes["href"].InnerText = cssName;
-        }
-
         private static void ApplyRules(XmlDocument xDoc, string cssData)
         {
             var beforeRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+):before\\s{\\scontent:\\s\"([^\"]*)");
@@ -271,6 +266,13 @@ namespace msWordExport
                         first = false;
                         continue;
                     }
+                    // Although Flex outputs in between rule, it also inserts in between punctuation
+                    // so here we make sure the rule should be applied
+                    var prevClass = child.PreviousSibling.SelectSingleNode("@class");
+                    if (prevClass == null || prevClass.InnerText != "xitem")
+                    {
+                        continue;
+                    }
                     child.InnerText = betweenRules[className] + child.InnerText;
                 }
             }
@@ -308,22 +310,6 @@ namespace msWordExport
                 rules[match.Groups[1].Value] = match.Groups[2].Value;
             }
             return rules;
-        }
-
-        private static void CreateArgumentList(IEnumerable<string> myArgs, XsltArgumentList xsltArgs)
-        {
-            foreach (string definition in myArgs)
-            {
-                if (definition.Contains(":"))
-                {
-                    var defParse = definition.Split(':');
-                    xsltArgs.AddParam(defParse[0], "", defParse[1]);
-                }
-                else
-                {
-                    xsltArgs.AddParam(definition, "", true);
-                }
-            }
         }
 
         protected static XmlNamespaceManager GetNamespaceManager(XmlDocument xmlDocument, string defaultNs)
