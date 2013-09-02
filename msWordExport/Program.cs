@@ -116,12 +116,16 @@ namespace msWordExport
 
         private static void UpdateImgSrc(XmlDocument xDoc, XmlNamespaceManager nsmgr)
         {
-            var imgBase = xDoc.SelectSingleNode("//xhtml:meta[@name = 'linkedFilesRootDir']/@content", nsmgr).Value;
+            var imgBase = xDoc.SelectSingleNode("//xhtml:meta[@name = 'linkedFilesRootDir']/@content", nsmgr);
+            if (imgBase == null)
+            {
+                return;
+            }
             foreach (XmlNode node in xDoc.SelectNodes("//xhtml:img/@src", nsmgr))
             {
                 if (!Path.IsPathRooted(node.InnerText))
                 {
-                    node.InnerText = Path.Combine(imgBase, node.InnerText);
+                    node.InnerText = Path.Combine(imgBase.Value, node.InnerText);
                 }
             }
         }
@@ -146,6 +150,10 @@ namespace msWordExport
 
         private static void InsertStyles(string cssData, XmlDocument xDoc, XmlNamespaceManager nsmgr)
         {
+            if (cssData == null)
+            {
+                return;
+            }
             var style = new StringBuilder("\n");
             var declPattern = new Regex("\\.([-a-zA-Z]+)\\s{");
             var propPattern = new Regex("\\s+([-a-zA-Z]+)\\:");
@@ -212,6 +220,10 @@ namespace msWordExport
 
         private static void ApplyRules(XmlDocument xDoc, string cssData)
         {
+            if (cssData == null)
+            {
+                return;
+            }
             var beforeRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+):before\\s{\\scontent:\\s\"([^\"]*)");
             var betweenRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+)>\\.xitem\\s\\+\\s\\.xitem:before\\s{\\scontent:\\s\"([^\"]*)");
             var afterRules = CollectRules(cssData, "\n\\.([-a-zA-Z]+):after\\s{\\scontent:\\s\"([^\"]*)");
@@ -295,6 +307,10 @@ namespace msWordExport
             var folder = Path.GetDirectoryName(fullName);
             var cssName = name + ".css";
             var cssFullName = Path.Combine(folder, cssName);
+            if (!File.Exists(cssFullName))
+            {
+                return null;
+            }
             var fs = new StreamReader(cssFullName);
             var cssData = fs.ReadToEnd();
             fs.Close();

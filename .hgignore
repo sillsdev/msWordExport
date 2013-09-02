@@ -5,6 +5,8 @@ _ReSharper.DblMetaData
 .*\.user
 .*\.suo
 TestResults
+.*\.testsettings
+.*\.vsmdi
 Data
 .*/Debug/.*\.exe
 .*/Release/.*\.exe
