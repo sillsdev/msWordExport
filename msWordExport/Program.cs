@@ -309,12 +309,44 @@ namespace msWordExport
             var cssFullName = Path.Combine(folder, cssName);
             if (!File.Exists(cssFullName))
             {
-                return null;
+                cssFullName = ScanXmlForCss(fullName, folder);
+                if (cssFullName == null)
+                {
+                    return null;
+                }
             }
             var fs = new StreamReader(cssFullName);
             var cssData = fs.ReadToEnd();
             fs.Close();
             return cssData;
+        }
+
+        private static string ScanXmlForCss(string fullName, string folder)
+        {
+            var xr = XmlReader.Create(fullName);
+            while (xr.Read())
+            {
+                if (xr.NodeType == XmlNodeType.Element)
+                {
+                    string href = string.Empty, rel = string.Empty;
+                    if (xr.Name == "link")
+                    {
+                        xr.MoveToAttribute("href");
+                        href = xr.Value;
+                        xr.MoveToAttribute("rel");
+                        rel = xr.Value;
+                        if (rel == "stylesheet")
+                        {
+                            return Path.Combine(folder, href);
+                        }
+                    }
+                    else if (xr.Name == "body")
+                    {
+                        return null;
+                    }
+                }
+            }
+            return null;
         }
 
         private static Dictionary<string, string> CollectRules(string cssData, string patternDesc)
