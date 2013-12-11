@@ -253,6 +253,30 @@ namespace TestProject
         }
 
         /// <summary>
+        ///A test for InsertStyles border property
+        ///</summary>
+        [TestMethod()]
+        [DeploymentItem("msWordExport.exe")]
+        public void InsertStylesBorderTest()
+        {
+            const string TestDataName = "InsertStylesBorder";
+            var cssSr = new StreamReader(_tf.Input(TestDataName + ".css"));
+            string cssData = cssSr.ReadToEnd();
+            cssSr.Close();
+            var xDoc = new XmlDocument() { XmlResolver = null };
+            var sr = new StreamReader(_tf.Input(TestDataName + ".xhtml"));
+            xDoc.Load(sr);
+            sr.Close();
+            var nsmgr = new XmlNamespaceManager(xDoc.NameTable);
+            nsmgr.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
+            Program_Accessor.InsertStyles(cssData, xDoc, nsmgr);
+            var sw = XmlTextWriter.Create(_tf.Output(TestDataName + ".xhtml"));
+            xDoc.Save(sw);
+            sw.Close();
+            TextFileAssert.AreEqual(_tf.Expected(TestDataName + ".xhtml"), _tf.Output(TestDataName + ".xhtml"));
+        }
+
+        /// <summary>
         ///A test for InsertTitle
         ///</summary>
         [TestMethod()]

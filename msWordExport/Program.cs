@@ -19,7 +19,6 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using System.Xml.Xsl;
 using Mono.Options;
 
 
@@ -157,8 +156,12 @@ namespace msWordExport
             var style = new StringBuilder("\n");
             var declPattern = new Regex("\\.([-a-zA-Z]+)\\s{");
             var propPattern = new Regex("\\s+([-a-zA-Z]+)\\:");
+            var valuePattern = new Regex("\\s*([+-]*[0-9]+\\.?[0-9]*)");
             var isSpan = false;
             var firstDecl = false;
+            var borderProps = false;
+            var hasBorder = false;
+            var borderBuffer = new StringBuilder();
             var propertyList = new List<string>()
                 {
                     "padding-left",
@@ -172,6 +175,10 @@ namespace msWordExport
                     "border-left",
                     "border-right",
                     "border-width",
+                    "border-top-width",
+                    "border-bottom-width",
+                    "border-left-width",
+                    "border-right-width",
                     "border-color"
                 };
             foreach (string line in cssData.Split(new[] {'\n'}))
@@ -186,16 +193,36 @@ namespace msWordExport
                         var node = (XmlElement) xDoc.SelectSingleNode(xpath);
                         isSpan = (node != null && node.LocalName == "span");
                     }
-                    else if (isSpan)
+                    var matchProp = propPattern.Match(line);
+                    if (matchProp.Success)
                     {
-                        var matchProp = propPattern.Match(line);
-                        if (matchProp.Success)
+                        var propertyName = matchProp.Groups[1].Value;
+                        if (propertyList.Contains(propertyName) && isSpan)
                         {
-                            if (propertyList.Contains(matchProp.Groups[1].Value))
-                            {
-                                continue;
-                            }
+                            continue;
                         }
+                        if (propertyName.StartsWith("border"))
+                        {
+                            borderProps = true;
+                            borderBuffer.Append(line);
+                            var matchValue = valuePattern.Match(line.Substring(matchProp.Length));
+                            if (matchValue.Success)
+                            {
+                                var val = float.Parse(matchValue.Groups[1].Value);
+                                hasBorder |= (val != 0.0f);
+                            }
+                            continue;
+                        }
+                    }
+                    if (borderProps)
+                    {
+                        if (hasBorder)
+                        {
+                            style.Append(borderBuffer);
+                            hasBorder = false;
+                        }
+                        borderBuffer.Remove(0, borderBuffer.Length);
+                        borderProps = false;
                     }
                     if (firstDecl)
                     {
